@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystery Box Mania</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Pacifico&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font integration */
+        body {
+            font-family: 'Bangers', cursive;
+            background-color: #FF8C00; /* Bold Orange */
+            overflow: hidden;
+            color: white;
+        }
+
+        .title-text {
+            animation: text-pop-in 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            font-size: 5rem;
+            text-shadow: 4px 4px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        .subtitle-text {
+            font-family: sans-serif;
+            animation: fade-in 2s ease-in-out forwards;
+            animation-delay: 0.5s;
+            opacity: 0;
+        }
+
+        .mystery-box {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            position: relative;
+            perspective: 1000px; /* Anaglyph 3D ke liye zaroori */
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .mystery-box-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .mystery-box.flipped .mystery-box-inner {
+            transform: rotateY(180deg);
+        }
+
+        .box-front, .box-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari ke liye */
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box-front {
+            background: linear-gradient(145deg, #fca503, #e87c03);
+            border: 4px solid #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(255,255,255,0.5);
+            font-size: 5rem;
+            color: white;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+        }
+
+        .mystery-box:hover .box-front {
+            box-shadow: 0 20px 30px rgba(0,0,0,0.4), 0 0 25px #ffeb3b, inset 0 0 10px rgba(255,255,255,0.7);
+        }
+
+        .box-back {
+            background: #fff;
+            transform: rotateY(180deg);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .prize-text {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.5rem;
+            color: #ef6546; /* Fuchsia */
+            animation: prize-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        .bomb-text {
+            font-size: 5rem;
+            animation: prize-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Modal styling */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 100;
+        }
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            padding: 40px 60px;
+            background-color: white;
+            border-radius: 20px;
+            text-align: center;
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        .game-over-text {
+            font-size: 4rem;
+            color: red;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        /* Keyframe animations */
+        @keyframes text-pop-in {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fade-in {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes prize-pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Game Title -->
+    <header class="text-center text-white mb-8">
+        <h1 class="title-text">Sign Mystery Box Mania!</h1>
+        <p class="subtitle-text text-xl font-bold">5 Prizes, 5 Bomb... Choose Wisely!</p>
+    </header>
+
+    <!-- Mystery Box Grid -->
+    <main id="game-board" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 sm:gap-8">
+        <!-- Boxes JavaScript se banaye jayenge -->
+    </main>
+    
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <p class="game-over-text">Game Over!</p>
+            <button id="restartButton" class="mt-4 px-6 py-2 bg-yellow-400 text-black font-bold rounded-lg text-xl border-2 border-black hover:bg-yellow-500 transition">Try Again!</button>
+        </div>
+    </div>
+
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameBoard = document.getElementById('game-board');
+            const gameOverModal = document.getElementById('gameOverModal');
+            const restartButton = document.getElementById('restartButton');
+
+            // --- Khel ki Configuration ---
+            const PRIZES = [
+                'Orange Hand',
+                'Orange in the Veins',
+                'Support Warrior',
+                'Serious Builder',
+                'Content Creator'
+            ];
+            const BOMB_CONTENT = '💣';
+            const NUM_BOMBS = 5;
+            const TOTAL_BOXES = PRIZES.length + NUM_BOMBS;
+            
+            let boxContents = [];
+            let isGameOver = false;
+
+            // --- Utility Functions ---
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            // --- Khel ka Logic ---
+            function createGameBoard() {
+                // Game state ko reset karein
+                gameBoard.innerHTML = '';
+                isGameOver = false;
+
+                // Content array banayein
+                boxContents = [...PRIZES];
+                for (let i = 0; i < NUM_BOMBS; i++) {
+                    boxContents.push(BOMB_CONTENT);
+                }
+
+                // Contents ko shuffle karein
+                shuffleArray(boxContents);
+                
+                // Boxes banayein aur append karein
+                for (let i = 0; i < TOTAL_BOXES; i++) {
+                    const box = document.createElement('div');
+                    box.classList.add('mystery-box');
+                    box.dataset.index = i;
+
+                    box.style.animationDelay = `${Math.random() * 2}s`;
+
+                    const inner = document.createElement('div');
+                    inner.classList.add('mystery-box-inner');
+                    
+                    const front = document.createElement('div');
+                    front.classList.add('box-front');
+                    front.textContent = '?';
+                    
+                    const back = document.createElement('div');
+                    back.classList.add('box-back');
+                    
+                    const content = boxContents[i];
+                    if (content === BOMB_CONTENT) {
+                        back.innerHTML = `<span class="bomb-text">${BOMB_CONTENT}</span>`;
+                    } else {
+                        back.innerHTML = `<span class="prize-text">${content}</span>`;
+                    }
+                    
+                    inner.appendChild(front);
+                    inner.appendChild(back);
+                    box.appendChild(inner);
+
+                    box.addEventListener('click', handleBoxClick);
+                    gameBoard.appendChild(box);
+                }
+            }
+
+            function handleBoxClick(event) {
+                if (isGameOver) return;
+                
+                const clickedBox = event.currentTarget;
+                if (clickedBox.classList.contains('flipped')) return; // Pehle se flipped box par kuch na karein
+
+                clickedBox.classList.add('flipped');
+                
+                const index = clickedBox.dataset.index;
+                const content = boxContents[index];
+
+                if (content === BOMB_CONTENT) {
+                    endGame();
+                }
+            }
+            
+            function endGame() {
+                isGameOver = true;
+                setTimeout(() => {
+                    gameOverModal.classList.add('show');
+                    revealAllBoxes();
+                }, 1200);
+            }
+
+            function revealAllBoxes() {
+                const allBoxes = document.querySelectorAll('.mystery-box:not(.flipped)');
+                allBoxes.forEach(box => {
+                    setTimeout(() => {
+                        box.classList.add('flipped');
+                    }, Math.random() * 1000); // Reveal ko thoda alag alag time par karein
+                });
+            }
+            
+            function restartGame() {
+                gameOverModal.classList.remove('show');
+                setTimeout(createGameBoard, 500);
+            }
+
+            // --- Event Listeners ---
+            restartButton.addEventListener('click', restartGame);
+
+            // --- Khel Shuru Karein ---
+            createGameBoard();
+        });
+    </script>
+</body>
+</html>
+
